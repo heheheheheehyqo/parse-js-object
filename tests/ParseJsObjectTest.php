@@ -2,38 +2,36 @@
 
 namespace Hyqo\Parser\Test;
 
-use Hyqo\Parser\Json\Exception\UnexpectedToken;
-use Hyqo\Parser\JsonParser;
+use Hyqo\Parser\Json\UnexpectedToken;
 use PHPUnit\Framework\TestCase;
 
 use function Hyqo\Parser\parse_js_object;
 
 class ParseJsObjectTest extends TestCase
 {
-    public function test_parse_js_object()
+    public function test_parse_js_object(): void
     {
-//        var_dump((float)'1.1.1');
-//        var_dump(preg_quote('\\','/'));
-//        var_dump(preg_match(sprintf('/(?<!%1$s)%1$s$/', preg_quote(Sign::BACKSLASH,'/')), 'test\\'));
-//        var_dump(substr("", -1));
-//        JsonParser::parse('{foo : "bar", "bar": 123, "bool": true, "null":null}');
-//        JsonParser::parse('[1,2]');
-//        $json1 = json_encode(['^foo' => '&bar\\', 'bar' => [['foo2' => 'bar2'], 2]]);
-//        $json =  json_encode(['^foo'=> '&bar\\', 'bar'=>[['foo2'=>'bar2'], 2]],JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
-//        $json =  json_encode(['<foo>',"'bar'",'"baz"','&blong&', "\xc3\xa9"],JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+        $this->assertEquals(
+            (object)[
+                'foo' => 'bar\\',
+                'bar' => [
+                    1,
+                    (object)[
+                        'foo2' => 'bar2',
+                        'foo3' => (object)[
+                            '' => 666,
+                            'foo4' => (object)[],
+                        ],
+                    ],
+                    2,
+                    (object)[
+                        'f' => ''
+                    ]
+                ]
+            ],
+            parse_js_object('{"foo" : "bar\\\\", "bar": [1,{"foo2":"bar2", "foo3": {"":666, "foo4": {}}},2,{"f":""}]}')
+        );
 
-//        var_dump(json_decode($json));
-
-//        var_dump($json);
-
-//        var_dump(json_decode($json3));
-//        var_dump(JsonParser::parse($json3, true, 512, JsonParser::VERBOSE));
-
-//        var_dump(JsonParser::parse($json));
-//        var_dump(JsonParser::parse($json, true, 512, JsonParser::VERBOSE));
-
-//        var_dump(parse_js_object('"{foo: \"bar\"}"', true, 512, JsonParser::VERBOSE));
-//        var_dump(parse_js_object('"{foo: \"bar\"}"', true, 512, JsonParser::VERBOSE));
         $this->assertEquals(
             (object)[
                 'string' => 'foo',
@@ -41,7 +39,7 @@ class ParseJsObjectTest extends TestCase
                 'complex' => [
                     (object)[
                         'types' => (object)[
-                            'int' => 123,
+                            'int' => -123,
                             'true' => true,
                             'false' => false,
                             'null' => null,
@@ -52,7 +50,7 @@ class ParseJsObjectTest extends TestCase
                 ]
             ],
             parse_js_object(
-                '{string : "foo", "multi_line": "foo\nbar","complex": [{"types": {"int": 123, "true": true, "false": false, "null": null,"array_of_int": [1,2], "empty_array": []}}]}'
+                ' {string : "foo", \'multi_line\': "foo\nbar","complex": [{"types": {"int": -123, "true": true, "false": false, "null": null,"array_of_int": [1,2], "empty_array": []}}]}'
             )
         );
 
@@ -60,7 +58,15 @@ class ParseJsObjectTest extends TestCase
             [
                 'foo' => "bar\nbaz",
             ],
-            parse_js_object('{foo : "bar\nbaz",}', true)
+            parse_js_object('{"foo": "bar\nbaz"}', true)
+        );
+
+        $this->assertEquals(
+            [
+                'foo' => 0,
+                'bar' => [],
+            ],
+            parse_js_object('{foo : 0, bar: []}', true)
         );
 
         $this->assertEquals(
@@ -70,7 +76,6 @@ class ParseJsObjectTest extends TestCase
             parse_js_object('{"foo🚧": {}}', true)
         );
 
-        $this->assertEquals(null, parse_js_object(''));
         $this->assertEquals(true, parse_js_object('true'));
         $this->assertEquals(1, parse_js_object('1'));
         $this->assertEquals("foo", parse_js_object('"foo"'));
@@ -81,15 +86,20 @@ class ParseJsObjectTest extends TestCase
     {
         foreach (
             [
+                '',
+                ' {',
                 '"{foo: \"bar"}"',
                 '"{foo: "bar"}"',
+                '{foo: "bar"}}',
+                '{"foo: "bar"}}',
+                '{foo[',
                 '{foo',
                 'foo',
             ] as $string
         ) {
             $this->expectException(UnexpectedToken::class);
 
-            parse_js_object($string);
+            parse_js_object($string, false, true);
         }
     }
 }

@@ -46,8 +46,8 @@ array(1) {
 | `.2`    | float(0.2)      |
 
 ```php
-parse_js_object('true');
-parse_js_object('true');
+parse_js_object('true'); //bool(true)
+parse_js_object('-123'); //int(-123)
 ```
 
 #### Complex example

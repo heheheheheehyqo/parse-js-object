@@ -2,14 +2,20 @@
 
 namespace Hyqo\Parser;
 
-/**
- * @return array|object
- */
-function parse_js_object(string $json, bool $associative = false, int $depth = 512, int $flags = 0)
-{
-//        if (null !== $data = json_decode($json, $associative, $depth)) {
-//            return $data;
-//        }
+use Hyqo\Parser\Json\UnexpectedToken;
 
-    return JsonParser::doParse(0, $json, $associative, $flags)[0] ?? null;
+/**
+ * @return array|object|null
+ */
+function parse_js_object(string $json, bool $associative = false, bool $throwOnError = false)
+{
+    try {
+        return JsonParser::doParse(0, $json, $associative)[0] ?? null;
+    } catch (UnexpectedToken $e) {
+        if ($throwOnError) {
+            throw new UnexpectedToken($e->position);
+        }
+
+        return null;
+    }
 }
