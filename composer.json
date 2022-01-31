@@ -11,8 +11,7 @@
         }
     ],
     "require": {
-        "php": ">=7.2 <8.1",
-        "hyqo/enum": "^1.0"
+        "php": ">=7.2 <8.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5"
