@@ -2,7 +2,7 @@
 
 ![Packagist Version](https://img.shields.io/packagist/v/hyqo/parse-js-object?style=flat-square)
 ![Packagist PHP Version Support](https://img.shields.io/packagist/php-v/hyqo/parse-js-object?style=flat-square)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/hyqo/parse-js-object/run-tests?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/hyqo/parse-js-object/tests.yml?branch=main&style=flat-square)
 
 Parse string with JS object to PHP object/array
 
